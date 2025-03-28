@@ -27,6 +27,73 @@ export type Database = {
         }
         Relationships: []
       }
+      chat_messages: {
+        Row: {
+          chat_id: string
+          content: string
+          created_at: string
+          id: string
+          sender_id: string
+          sender_type: string
+        }
+        Insert: {
+          chat_id: string
+          content: string
+          created_at?: string
+          id?: string
+          sender_id: string
+          sender_type: string
+        }
+        Update: {
+          chat_id?: string
+          content?: string
+          created_at?: string
+          id?: string
+          sender_id?: string
+          sender_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chat_messages_chat_id_fkey"
+            columns: ["chat_id"]
+            isOneToOne: false
+            referencedRelation: "chats"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      chats: {
+        Row: {
+          created_at: string
+          customer_id: string
+          id: string
+          rep_id: string | null
+          status: string
+        }
+        Insert: {
+          created_at?: string
+          customer_id: string
+          id?: string
+          rep_id?: string | null
+          status?: string
+        }
+        Update: {
+          created_at?: string
+          customer_id?: string
+          id?: string
+          rep_id?: string | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chats_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customer_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       customer_profiles: {
         Row: {
           address: string | null
@@ -146,6 +213,44 @@ export type Database = {
           },
         ]
       }
+      payment_records: {
+        Row: {
+          amount: number
+          created_at: string
+          id: string
+          order_id: string
+          payment_provider: string
+          status: string
+          transaction_id: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          id?: string
+          order_id: string
+          payment_provider: string
+          status: string
+          transaction_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          id?: string
+          order_id?: string
+          payment_provider?: string
+          status?: string
+          transaction_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payment_records_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       products: {
         Row: {
           category_id: string | null
@@ -203,6 +308,33 @@ export type Database = {
           },
         ]
       }
+      promotions: {
+        Row: {
+          created_at: string
+          end_date: string
+          id: string
+          is_active: boolean | null
+          start_date: string
+          text: string
+        }
+        Insert: {
+          created_at?: string
+          end_date: string
+          id?: string
+          is_active?: boolean | null
+          start_date: string
+          text: string
+        }
+        Update: {
+          created_at?: string
+          end_date?: string
+          id?: string
+          is_active?: boolean | null
+          start_date?: string
+          text?: string
+        }
+        Relationships: []
+      }
       subcategories: {
         Row: {
           category_id: string
@@ -232,11 +364,38 @@ export type Database = {
           },
         ]
       }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
+      has_role: {
+        Args: {
+          role: string
+        }
+        Returns: boolean
+      }
       query_embeddings: {
         Args: {
           embedding: string

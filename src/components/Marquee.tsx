@@ -1,19 +1,29 @@
 
 import React, { useEffect, useState } from 'react';
-import { fetchActivePromotions, Promotion } from '@/lib/mockData';
+import { Promotion } from '@/types/supabase';
+import { fetchActivePromotions } from '@/lib/services/promotionService';
 
 const Marquee = () => {
   const [promotions, setPromotions] = useState<Promotion[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   
   useEffect(() => {
     const getPromotions = async () => {
-      const activePromotions = await fetchActivePromotions();
-      setPromotions(activePromotions);
+      setIsLoading(true);
+      try {
+        const activePromotions = await fetchActivePromotions();
+        setPromotions(activePromotions);
+      } catch (error) {
+        console.error('Error loading promotions:', error);
+      } finally {
+        setIsLoading(false);
+      }
     };
     
     getPromotions();
   }, []);
   
+  if (isLoading) return null;
   if (promotions.length === 0) return null;
   
   return (
