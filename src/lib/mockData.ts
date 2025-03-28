@@ -1,15 +1,16 @@
-
 export type Product = {
   id: number;
   name: string;
   description: string;
   price: number;
+  oldPrice?: number;
   imageUrl: string;
   category: string;
   subcategory: string;
   isFeatured: boolean;
   stockQuantity: number;
   createdAt: string;
+  category_id?: string;
 };
 
 export type Category = {

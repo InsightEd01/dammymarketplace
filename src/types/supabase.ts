@@ -1,4 +1,3 @@
-
 // Define types for our Supabase database tables
 export type Category = {
   id: string;
@@ -15,17 +14,18 @@ export type Subcategory = {
 };
 
 export type Product = {
-  id: string;
+  id: string | number;
   name: string;
   description: string;
   price: number;
-  oldPrice?: number; // Optional old price for discounts
+  oldPrice?: number; // Added oldPrice property
   imageUrl: string;
   category_id: string;
   subcategory_id?: string;
   stockQuantity: number;
   isFeatured: boolean;
   category?: string; // Category name for display
+  subcategory?: string; // Added subcategory name for display
   created_at?: string;
 };
 
