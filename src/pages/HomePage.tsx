@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Product } from '@/lib/mockData';
@@ -33,7 +34,9 @@ const HomePage = () => {
             stockQuantity: 10 + idx,
             isFeatured: true,
             category_id: `cat-${idx}`,
-          }));
+            subcategory: ['Limited Edition', 'Vintage', 'Modern', 'Rare'][idx % 4],
+            createdAt: new Date().toISOString()
+          } as Product));
           
           // Mock newest products
           const mockNewest = Array(4).fill(null).map((_, idx) => ({
@@ -46,7 +49,9 @@ const HomePage = () => {
             stockQuantity: 5 + idx,
             isFeatured: false,
             category_id: `cat-${idx + 4}`,
-          }));
+            subcategory: ['Limited Edition', 'New Release', 'Special Edition', 'Exclusive'][idx % 4],
+            createdAt: new Date().toISOString()
+          } as Product));
           
           setFeaturedProducts(mockFeatured);
           setNewestProducts(mockNewest);

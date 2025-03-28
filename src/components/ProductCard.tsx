@@ -33,7 +33,8 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
       id: product.id,
       name: product.name,
       price: product.price,
-      image: product.imageUrl
+      image: product.imageUrl,
+      quantity: 1
     });
     
     toast({
@@ -112,7 +113,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
           <div className="flex justify-between items-center mb-3">
             <p className="price-tag">${product.price.toFixed(2)}</p>
             
-            {'oldPrice' in product && product.oldPrice && product.oldPrice > product.price && (
+            {product.oldPrice !== undefined && typeof product.oldPrice === 'number' && product.oldPrice > product.price && (
               <p className="text-sm text-gray-500 line-through">${product.oldPrice.toFixed(2)}</p>
             )}
           </div>

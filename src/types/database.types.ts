@@ -3,10 +3,11 @@
 // It will be used as a temporary solution until we set up the proper database
 
 export interface DatabaseProduct {
-  id: string;
+  id: string | number;
   name: string;
   description: string;
   price: number;
+  oldPrice?: number;
   imageUrl: string;
   category_id: string;
   subcategory_id?: string;

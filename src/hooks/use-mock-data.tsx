@@ -24,7 +24,9 @@ export const useMockProducts = (featured: boolean = false, limit: number = 4) =>
           stockQuantity: 10 + idx,
           isFeatured: featured,
           category_id: `cat-${idx % 4}`,
-        }));
+          subcategory: ['Limited Edition', 'Vintage', 'Modern', 'Rare'][idx % 4],
+          createdAt: new Date().toISOString()
+        } as Product));
         
         setProducts(mockProducts);
         setLoading(false);
