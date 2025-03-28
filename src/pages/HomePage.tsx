@@ -1,11 +1,8 @@
-
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { supabase } from '@/integrations/supabase/client';
+import { Product } from '@/lib/mockData';
 import ProductCard from '@/components/ProductCard';
 import { Button } from '@/components/ui/button';
-import { Product } from '@/lib/mockData';
-import Marquee from '@/components/Marquee';
 import { ArrowRight, Sparkles, ShoppingBag, Tag } from 'lucide-react';
 
 const HomePage = () => {
@@ -22,39 +19,42 @@ const HomePage = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // Fetch promotion text from Supabase
-        const { data: promoData, error: promoError } = await supabase
-          .from('promotions')
-          .select('text')
-          .eq('active', true);
+        // For now, let's simulate data instead of using Supabase
+        // This will be replaced with actual Supabase calls once we set up the database
+        setTimeout(() => {
+          // Mock featured products
+          const mockFeatured = Array(4).fill(null).map((_, idx) => ({
+            id: idx + 1,
+            name: `Featured Collectible ${idx + 1}`,
+            description: 'This is a featured collectible item.',
+            price: 29.99 + idx * 10,
+            imageUrl: `https://source.unsplash.com/random/300x300/?collectible&sig=${idx + 1}`,
+            category: ['Action Figures', 'Comics', 'Cards', 'Toys'][idx % 4],
+            stockQuantity: 10 + idx,
+            isFeatured: true,
+            category_id: `cat-${idx}`,
+          }));
           
-        if (!promoError && promoData && promoData.length > 0) {
-          setPromoText(promoData.map(promo => promo.text));
-        }
-        
-        // Fetch featured products
-        const { data: featuredData, error: featuredError } = await supabase
-          .from('products')
-          .select('*')
-          .eq('is_featured', true)
-          .limit(4);
+          // Mock newest products
+          const mockNewest = Array(4).fill(null).map((_, idx) => ({
+            id: idx + 5,
+            name: `New Collectible ${idx + 1}`,
+            description: 'This is a new collectible item.',
+            price: 19.99 + idx * 5,
+            imageUrl: `https://source.unsplash.com/random/300x300/?collectible&sig=${idx + 5}`,
+            category: ['Vinyl Toys', 'Memorabilia', 'Posters', 'Trading Cards'][idx % 4],
+            stockQuantity: 5 + idx,
+            isFeatured: false,
+            category_id: `cat-${idx + 4}`,
+          }));
           
-        if (featuredError) throw featuredError;
+          setFeaturedProducts(mockFeatured);
+          setNewestProducts(mockNewest);
+          setLoading(false);
+        }, 1000);
         
-        // Fetch newest products
-        const { data: newestData, error: newestError } = await supabase
-          .from('products')
-          .select('*')
-          .order('created_at', { ascending: false })
-          .limit(4);
-          
-        if (newestError) throw newestError;
-        
-        setFeaturedProducts(featuredData || []);
-        setNewestProducts(newestData || []);
       } catch (error) {
         console.error('Error fetching data:', error);
-      } finally {
         setLoading(false);
       }
     };
@@ -110,14 +110,16 @@ const HomePage = () => {
       
       {/* Promotions Marquee */}
       <div className="bg-primary text-white py-3">
-        <Marquee>
-          {promoText.map((text, index) => (
-            <span key={index} className="mx-6 font-medium flex items-center">
-              <Tag className="mr-2 h-4 w-4" />
-              {text}
-            </span>
-          ))}
-        </Marquee>
+        <div className="marquee-container">
+          <div className="marquee-content">
+            {promoText.map((text, index) => (
+              <span key={index} className="mx-6 font-medium flex items-center">
+                <Tag className="mr-2 h-4 w-4" />
+                {text}
+              </span>
+            ))}
+          </div>
+        </div>
       </div>
       
       {/* Featured Products Section */}

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -97,18 +96,8 @@ const AuthPage = () => {
       
       if (data?.user) {
         // After signup, create a profile in the customers table
-        const { error: profileError } = await supabase
-          .from('customers')
-          .insert([
-            { 
-              id: data.user.id,
-              email: email,
-              full_name: fullName,
-              created_at: new Date().toISOString()
-            }
-          ]);
-          
-        if (profileError) throw profileError;
+        // Note: We're removing this part temporarily as we don't have the proper DB schema yet
+        // It will be added back once we create the necessary tables
         
         toast({
           title: "Account created!",
