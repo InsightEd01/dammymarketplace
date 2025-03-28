@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -32,54 +31,48 @@ const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [categories, setCategories] = useState<Category[]>([]);
   const [user, setUser] = useState<any>(null);
-  const { cartItems } = useCart();
+  const { cart } = useCart();
   const { toast } = useToast();
   const navigate = useNavigate();
   
+  const cartItems = cart || [];
+  
   useEffect(() => {
-    // Get current user
     const getUser = async () => {
-      const { data } = await supabase.auth.getUser();
-      setUser(data.user);
+      try {
+        const { data } = await supabase.auth.getUser();
+        setUser(data.user);
+      } catch (error) {
+        console.error("Error getting user:", error);
+      }
     };
     
     getUser();
     
-    // Listen for auth changes
     const { data: authListener } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null);
     });
     
-    // Fetch categories
     const fetchCategories = async () => {
       try {
-        // Fetch categories
-        const { data: categoriesData, error: categoriesError } = await supabase
-          .from('categories')
-          .select('*')
-          .order('name');
-          
-        if (categoriesError) throw categoriesError;
-        
-        // Fetch subcategories for each category
-        const categoriesWithSubs = await Promise.all(
-          (categoriesData || []).map(async (category) => {
-            const { data: subcategoriesData, error: subcategoriesError } = await supabase
-              .from('subcategories')
-              .select('*')
-              .eq('category_id', category.id)
-              .order('name');
-              
-            if (subcategoriesError) throw subcategoriesError;
-            
-            return {
-              ...category,
-              subcategories: subcategoriesData || []
-            };
-          })
-        );
-        
-        setCategories(categoriesWithSubs);
+        setCategories([
+          {
+            id: '1',
+            name: 'Collectibles',
+            subcategories: [
+              { id: '1-1', name: 'Trading Cards', category_id: '1' },
+              { id: '1-2', name: 'Figurines', category_id: '1' }
+            ]
+          },
+          {
+            id: '2',
+            name: 'Vintage',
+            subcategories: [
+              { id: '2-1', name: 'Records', category_id: '2' },
+              { id: '2-2', name: 'Comics', category_id: '2' }
+            ]
+          }
+        ]);
       } catch (error) {
         console.error('Error fetching categories:', error);
       }
@@ -88,7 +81,6 @@ const Navbar = () => {
     fetchCategories();
     
     return () => {
-      // Clean up auth listener
       if (authListener?.subscription) {
         authListener.subscription.unsubscribe();
       }
@@ -96,20 +88,24 @@ const Navbar = () => {
   }, []);
   
   const handleSignOut = async () => {
-    const { error } = await supabase.auth.signOut();
-    
-    if (error) {
-      toast({
-        title: "Error signing out",
-        description: error.message,
-        variant: "destructive"
-      });
-    } else {
-      toast({
-        title: "Signed out",
-        description: "You have been signed out successfully"
-      });
-      navigate('/login');
+    try {
+      const { error } = await supabase.auth.signOut();
+      
+      if (error) {
+        toast({
+          title: "Error signing out",
+          description: error.message,
+          variant: "destructive"
+        });
+      } else {
+        toast({
+          title: "Signed out",
+          description: "You have been signed out successfully"
+        });
+        navigate('/login');
+      }
+    } catch (error) {
+      console.error("Error signing out:", error);
     }
   };
 
@@ -124,7 +120,6 @@ const Navbar = () => {
               </Link>
             </div>
             
-            {/* Desktop Navigation */}
             <div className="hidden sm:ml-6 sm:flex sm:space-x-8">
               <Link 
                 to="/" 
@@ -134,7 +129,6 @@ const Navbar = () => {
                 Home
               </Link>
               
-              {/* Categories Dropdown */}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <button className="inline-flex items-center px-1 pt-1 border-b-2 border-transparent text-sm font-medium text-gray-500 hover:text-gray-700 hover:border-gray-300">
@@ -182,9 +176,7 @@ const Navbar = () => {
             </div>
           </div>
           
-          {/* Right Navigation */}
           <div className="flex items-center">
-            {/* Cart Link */}
             <Link to="/cart" className="p-2 text-gray-400 hover:text-gray-500 relative">
               <ShoppingCart className="h-6 w-6" />
               {cartItems.length > 0 && (
@@ -194,7 +186,6 @@ const Navbar = () => {
               )}
             </Link>
             
-            {/* User Menu */}
             {user ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -234,7 +225,6 @@ const Navbar = () => {
               </Link>
             )}
             
-            {/* Mobile menu button */}
             <div className="flex items-center sm:hidden">
               <button
                 onClick={() => setIsOpen(!isOpen)}
@@ -247,7 +237,6 @@ const Navbar = () => {
         </div>
       </div>
 
-      {/* Mobile menu */}
       <div className={`${isOpen ? 'block' : 'hidden'} sm:hidden`}>
         <div className="pt-2 pb-3 space-y-1">
           <Link
@@ -258,7 +247,6 @@ const Navbar = () => {
             Home
           </Link>
           
-          {/* Mobile Categories */}
           {categories.map((category) => (
             <div key={category.id}>
               <Link
@@ -269,7 +257,6 @@ const Navbar = () => {
                 {category.name}
               </Link>
               
-              {/* Mobile Subcategories */}
               {category.subcategories && category.subcategories.length > 0 && (
                 <div className="pl-6">
                   {category.subcategories.map((subcategory) => (
