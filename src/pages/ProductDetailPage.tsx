@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { 
@@ -58,14 +57,13 @@ const ProductDetailPage = () => {
   
   const handleAddToCart = () => {
     if (product) {
-      for (let i = 0; i < quantity; i++) {
-        addToCart({
-          id: product.id,
-          name: product.name,
-          price: product.price,
-          image: product.imageUrl
-        });
-      }
+      addToCart({
+        id: product.id,
+        name: product.name,
+        price: product.price,
+        image: product.imageUrl,
+        quantity: quantity
+      });
     }
   };
   
