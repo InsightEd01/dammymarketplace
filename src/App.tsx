@@ -1,4 +1,5 @@
 
+import React from 'react'; // Explicit React import
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -16,6 +17,7 @@ import NotFound from "@/pages/NotFound";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
+// Create a new QueryClient instance outside of the component
 const queryClient = new QueryClient();
 
 const App = () => {
@@ -63,33 +65,35 @@ const App = () => {
   };
 
   return (
-    <QueryClientProvider client={queryClient}>
-      <CartProvider>
-        <TooltipProvider>
-          <Toaster />
-          <Sonner />
-          <BrowserRouter>
-            <Routes>
-              <Route path="/login" element={<AuthPage />} />
-              
-              <Route element={<MainLayout />}>
-                <Route path="/" element={<HomePage />} />
-                <Route path="/products" element={<ProductsPage />} />
-                <Route path="/product/:id" element={<ProductDetailPage />} />
-                <Route path="/cart" element={<CartPage />} />
-                <Route path="/checkout" element={
-                  <ProtectedRoute>
-                    <CheckoutPage />
-                  </ProtectedRoute>
-                } />
-              </Route>
-              
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </BrowserRouter>
-        </TooltipProvider>
-      </CartProvider>
-    </QueryClientProvider>
+    <React.StrictMode>
+      <QueryClientProvider client={queryClient}>
+        <CartProvider>
+          <TooltipProvider>
+            <BrowserRouter>
+              <Routes>
+                <Route path="/login" element={<AuthPage />} />
+                
+                <Route element={<MainLayout />}>
+                  <Route path="/" element={<HomePage />} />
+                  <Route path="/products" element={<ProductsPage />} />
+                  <Route path="/product/:id" element={<ProductDetailPage />} />
+                  <Route path="/cart" element={<CartPage />} />
+                  <Route path="/checkout" element={
+                    <ProtectedRoute>
+                      <CheckoutPage />
+                    </ProtectedRoute>
+                  } />
+                </Route>
+                
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </BrowserRouter>
+            <Toaster />
+            <Sonner />
+          </TooltipProvider>
+        </CartProvider>
+      </QueryClientProvider>
+    </React.StrictMode>
   );
 };
 

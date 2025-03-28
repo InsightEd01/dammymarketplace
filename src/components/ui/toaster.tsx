@@ -1,3 +1,5 @@
+
+import React from 'react'; // Explicit React import
 import { useToast } from "@/hooks/use-toast"
 import {
   Toast,
