@@ -1,51 +1,18 @@
 
 import { supabase } from "@/integrations/supabase/client";
-import { Chat, ChatMessage, ChatStatus, SenderType } from "@/types/supabase";
+import { Chat, ChatMessage, SenderType } from "@/types/supabase";
 
-// Function to get all chats
-export const getAllChats = async (): Promise<Chat[]> => {
-  try {
-    const { data, error } = await supabase
-      .from("chats")
-      .select(
-        `
-        *,
-        customer:customer_id(full_name, email)
-      `,
-      )
-      .order("created_at", { ascending: false });
-
-    if (error) {
-      console.error("Error fetching chats:", error);
-      return [];
-    }
-
-    // Transform the data to match our Chat type
-    return (data || []).map(chat => ({
-      ...chat,
-      status: chat.status as ChatStatus,
-      customer: {
-        full_name: chat.customer?.full_name || '',
-        email: chat.customer?.email || '',
-      }
-    }));
-  } catch (error) {
-    console.error("Unexpected error fetching chats:", error);
-    return [];
-  }
-};
-
-// Function to get open chats (unassigned)
+/**
+ * Fetch all open chats (status = 'open')
+ */
 export const getOpenChats = async (): Promise<Chat[]> => {
   try {
     const { data, error } = await supabase
       .from("chats")
-      .select(
-        `
+      .select(`
         *,
-        customer:customer_id(full_name, email)
-      `,
-      )
+        customer:customer_id(id, full_name, email)
+      `)
       .eq("status", "open")
       .order("created_at", { ascending: false });
 
@@ -54,60 +21,73 @@ export const getOpenChats = async (): Promise<Chat[]> => {
       return [];
     }
 
-    // Transform the data to match our Chat type
-    return (data || []).map(chat => ({
-      ...chat,
-      status: chat.status as ChatStatus,
-      customer: {
-        full_name: chat.customer?.full_name || '',
-        email: chat.customer?.email || '',
-      }
-    }));
+    // Type cast to match Chat interface
+    return (data || []) as Chat[];
   } catch (error) {
     console.error("Unexpected error fetching open chats:", error);
     return [];
   }
 };
 
-// Function to get assigned chats for a specific rep
+/**
+ * Fetch all chats assigned to a specific rep (customer service rep)
+ */
 export const getRepChats = async (repId: string): Promise<Chat[]> => {
   try {
     const { data, error } = await supabase
       .from("chats")
-      .select(
-        `
+      .select(`
         *,
-        customer:customer_id(full_name, email)
-      `,
-      )
+        customer:customer_id(id, full_name, email)
+      `)
       .eq("rep_id", repId)
       .eq("status", "assigned")
       .order("created_at", { ascending: false });
 
     if (error) {
-      console.error(`Error fetching chats for rep ${repId}:`, error);
+      console.error(`Error fetching rep chats for ${repId}:`, error);
       return [];
     }
 
-    // Transform the data to match our Chat type
-    return (data || []).map(chat => ({
-      ...chat,
-      status: chat.status as ChatStatus,
-      customer: {
-        full_name: chat.customer?.full_name || '',
-        email: chat.customer?.email || '',
-      }
-    }));
+    // Type cast to match Chat interface
+    return (data || []) as Chat[];
   } catch (error) {
-    console.error(`Unexpected error fetching chats for rep ${repId}:`, error);
+    console.error(`Unexpected error fetching rep chats for ${repId}:`, error);
     return [];
   }
 };
 
-// Function to get chat messages
-export const getChatMessages = async (
-  chatId: string,
-): Promise<ChatMessage[]> => {
+/**
+ * Fetch all chats for a specific customer
+ */
+export const getCustomerChats = async (customerId: string): Promise<Chat[]> => {
+  try {
+    const { data, error } = await supabase
+      .from("chats")
+      .select(`
+        *,
+        customer:customer_id(id, full_name, email)
+      `)
+      .eq("customer_id", customerId)
+      .order("created_at", { ascending: false });
+
+    if (error) {
+      console.error(`Error fetching customer chats for ${customerId}:`, error);
+      return [];
+    }
+
+    // Type cast to match Chat interface
+    return (data || []) as Chat[];
+  } catch (error) {
+    console.error(`Unexpected error fetching customer chats for ${customerId}:`, error);
+    return [];
+  }
+};
+
+/**
+ * Fetch messages for a specific chat
+ */
+export const getChatMessages = async (chatId: string): Promise<ChatMessage[]> => {
   try {
     const { data, error } = await supabase
       .from("chat_messages")
@@ -120,26 +100,22 @@ export const getChatMessages = async (
       return [];
     }
 
-    // Transform the data to match our ChatMessage type
-    return (data || []).map(message => ({
-      ...message,
-      sender_type: message.sender_type as SenderType,
-    }));
+    // Type cast to match ChatMessage interface
+    return (data || []) as ChatMessage[];
   } catch (error) {
-    console.error(
-      `Unexpected error fetching messages for chat ${chatId}:`,
-      error,
-    );
+    console.error(`Unexpected error fetching messages for chat ${chatId}:`, error);
     return [];
   }
 };
 
-// Function to send a message
+/**
+ * Send a message in a chat
+ */
 export const sendChatMessage = async (
   chatId: string,
   senderId: string,
   senderType: SenderType,
-  content: string,
+  content: string
 ): Promise<ChatMessage | null> => {
   try {
     const { data, error } = await supabase
@@ -148,37 +124,61 @@ export const sendChatMessage = async (
         chat_id: chatId,
         sender_id: senderId,
         sender_type: senderType,
-        content,
+        content: content,
       })
       .select()
       .single();
 
     if (error) {
-      console.error(`Error sending message to chat ${chatId}:`, error);
+      console.error(`Error sending message in chat ${chatId}:`, error);
       return null;
     }
 
-    return {
-      ...data,
-      sender_type: data.sender_type as SenderType,
-    };
+    // Type cast to match ChatMessage interface
+    return data as ChatMessage;
   } catch (error) {
-    console.error(`Unexpected error sending message to chat ${chatId}:`, error);
+    console.error(`Unexpected error sending message in chat ${chatId}:`, error);
     return null;
   }
 };
 
-// Function to assign a rep to a chat
-export const assignChatToRep = async (
-  chatId: string,
-  repId: string,
-): Promise<Chat | null> => {
+/**
+ * Create a new chat for a customer
+ */
+export const createChat = async (customerId: string): Promise<Chat | null> => {
+  try {
+    const { data, error } = await supabase
+      .from("chats")
+      .insert({
+        customer_id: customerId,
+        status: "open" as const,
+      })
+      .select()
+      .single();
+
+    if (error) {
+      console.error(`Error creating chat for customer ${customerId}:`, error);
+      return null;
+    }
+
+    // Type cast to match Chat interface
+    return data as Chat;
+  } catch (error) {
+    console.error(`Unexpected error creating chat for customer ${customerId}:`, error);
+    return null;
+  }
+};
+
+/**
+ * Assign a chat to a customer service rep
+ */
+export const assignChat = async (chatId: string, repId: string): Promise<Chat | null> => {
   try {
     const { data, error } = await supabase
       .from("chats")
       .update({
         rep_id: repId,
-        status: "assigned",
+        status: "assigned" as const,
       })
       .eq("id", chatId)
       .select()
@@ -189,26 +189,23 @@ export const assignChatToRep = async (
       return null;
     }
 
-    return {
-      ...data,
-      status: data.status as ChatStatus,
-    };
+    // Type cast to match Chat interface
+    return data as Chat;
   } catch (error) {
-    console.error(
-      `Unexpected error assigning chat ${chatId} to rep ${repId}:`,
-      error,
-    );
+    console.error(`Unexpected error assigning chat ${chatId} to rep ${repId}:`, error);
     return null;
   }
 };
 
-// Function to close a chat
+/**
+ * Close a chat (change status to 'closed')
+ */
 export const closeChat = async (chatId: string): Promise<Chat | null> => {
   try {
     const { data, error } = await supabase
       .from("chats")
       .update({
-        status: "closed",
+        status: "closed" as const,
       })
       .eq("id", chatId)
       .select()
@@ -219,44 +216,10 @@ export const closeChat = async (chatId: string): Promise<Chat | null> => {
       return null;
     }
 
-    return {
-      ...data,
-      status: data.status as ChatStatus,
-    };
+    // Type cast to match Chat interface
+    return data as Chat;
   } catch (error) {
     console.error(`Unexpected error closing chat ${chatId}:`, error);
-    return null;
-  }
-};
-
-// Function to create a new chat
-export const createNewChat = async (
-  customerId: string,
-): Promise<Chat | null> => {
-  try {
-    const { data, error } = await supabase
-      .from("chats")
-      .insert({
-        customer_id: customerId,
-        status: "open",
-      })
-      .select()
-      .single();
-
-    if (error) {
-      console.error(`Error creating chat for customer ${customerId}:`, error);
-      return null;
-    }
-
-    return {
-      ...data,
-      status: data.status as ChatStatus,
-    };
-  } catch (error) {
-    console.error(
-      `Unexpected error creating chat for customer ${customerId}:`,
-      error,
-    );
     return null;
   }
 };

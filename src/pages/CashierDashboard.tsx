@@ -195,7 +195,7 @@ const CashierDashboard = () => {
 // Customer Search Component
 const CustomerSearch = ({ onSelectCustomer }: { onSelectCustomer: (customer: any) => void }) => {
   const [searchTerm, setSearchTerm] = useState("");
-  const [results, setResults: any] = useState([]);
+  const [results, setResults] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -215,7 +215,6 @@ const CustomerSearch = ({ onSelectCustomer }: { onSelectCustomer: (customer: any
 
         if (error) throw error;
         
-        // Type safe assignment
         setResults(data || []);
       } catch (error) {
         console.error("Error searching customers:", error);
@@ -289,7 +288,6 @@ const Checkout = ({ cart, customerId, customerDetails, reset }: any) => {
         product_id: item.id,
         quantity: item.quantity,
         price: item.price, // Use price instead of unit_price
-        // These fields are for display in the frontend and not stored in DB:
         product_name: item.name,
         product_image: item.imageUrl
       }));

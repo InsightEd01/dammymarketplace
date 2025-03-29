@@ -98,6 +98,7 @@ export type Database = {
         Row: {
           address: string | null
           created_at: string
+          email: string | null
           full_name: string | null
           id: string
           phone: string | null
@@ -105,6 +106,7 @@ export type Database = {
         Insert: {
           address?: string | null
           created_at?: string
+          email?: string | null
           full_name?: string | null
           id: string
           phone?: string | null
@@ -112,6 +114,7 @@ export type Database = {
         Update: {
           address?: string | null
           created_at?: string
+          email?: string | null
           full_name?: string | null
           id?: string
           phone?: string | null
@@ -411,6 +414,13 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      decrement_stock: {
+        Args: {
+          product_id: string
+          quantity: number
+        }
+        Returns: number
+      }
       has_role: {
         Args: {
           role: string

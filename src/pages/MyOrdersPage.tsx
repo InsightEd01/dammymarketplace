@@ -136,8 +136,8 @@ const OrderDetails = ({ order }: { order: OrderWithItems }) => {
                 )}
                 <div>
                   <p className="font-medium">{item.product_name || `Product ${item.product_id.slice(0, 8)}`}</p>
-                  <p className="text-sm text-muted-foreground">
-                    Qty: {item.quantity} x ${item.price.toFixed(2)}
+                  <p className="text-sm text-gray-500">
+                    ${item.price.toFixed(2)} x {item.quantity}
                   </p>
                 </div>
               </div>

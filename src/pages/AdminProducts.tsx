@@ -96,6 +96,30 @@ const formSchema = z.object({
   created_at: z.date().optional(),
 });
 
+const PaginationLink = ({
+  page,
+  isActive,
+  onClick,
+  disabled
+}: {
+  page: number;
+  isActive: boolean;
+  onClick: () => void;
+  disabled?: boolean;
+}) => {
+  return (
+    <Button
+      variant={isActive ? "default" : "outline"}
+      size="sm"
+      className={`w-9 h-9 p-0 ${isActive ? "pointer-events-none" : ""}`}
+      onClick={onClick}
+      disabled={disabled}
+    >
+      {page}
+    </Button>
+  );
+};
+
 const ProductsTable = ({
   products,
   onEdit,
@@ -212,7 +236,6 @@ const ProductsTable = ({
         <div className="mt-4">
           <Pagination>
             <PaginationContent>
-              {/* Remove the direct disabled prop and use CSS instead */}
               <PaginationItem className={currentPage === 1 ? "opacity-50 pointer-events-none" : ""}>
                 <PaginationPrevious onClick={() => onPageChange(currentPage - 1)} />
               </PaginationItem>
@@ -976,3 +999,5 @@ import {
   FormDescription,
 } from "@/components/ui/form";
 import { Checkbox } from "@/components/ui/checkbox";
+
+</edits_to_apply>
