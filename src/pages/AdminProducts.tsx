@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useAdminAuth } from "@/hooks/useAdminAuth";
 import { supabase } from "@/integrations/supabase/client";
@@ -15,6 +14,7 @@ import {
   Pagination,
   PaginationContent,
   PaginationItem,
+  PaginationLink,
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
@@ -44,7 +44,6 @@ import {
   Search,
   ArrowUpDown,
   ImagePlus,
-  CalendarIcon,
 } from "lucide-react";
 import {
   AlertDialog,
@@ -64,24 +63,15 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-  FormDescription,
 } from "@/components/ui/form";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
+import { CalendarIcon } from "@radix-ui/react-icons";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { Checkbox } from "@/components/ui/checkbox";
 
 const formSchema = z.object({
   name: z.string().min(2, {
@@ -106,8 +96,7 @@ const formSchema = z.object({
   created_at: z.date().optional(),
 });
 
-// Custom PaginationLink component that accepts the required props
-const PaginationLinkComponent = ({
+const PaginationLink = ({
   page,
   isActive,
   onClick,
@@ -265,11 +254,12 @@ const ProductsTable = ({
                 
                 return (
                   <PaginationItem key={pageNum}>
-                    <PaginationLinkComponent
-                      page={pageNum}
+                    <PaginationLink
                       isActive={currentPage === pageNum}
                       onClick={() => onPageChange(pageNum)}
-                    />
+                    >
+                      {pageNum}
+                    </PaginationLink>
                   </PaginationItem>
                 );
               })}
@@ -477,25 +467,7 @@ const AdminProducts = () => {
 
   const onSubmitCreate = async (values: z.infer<typeof formSchema>) => {
     try {
-      // Convert Date to ISO string for Supabase and ensure required fields are present
-      const productData = {
-        name: values.name, // Make sure required fields are explicitly set
-        price: values.price,
-        description: values.description || "",
-        old_price: values.old_price || null,
-        stock_quantity: values.stock_quantity,
-        is_featured: values.is_featured || false,
-        category_id: values.category_id,
-        subcategory_id: values.subcategory_id || null,
-        image_url: values.image_url,
-        created_at: values.created_at ? values.created_at.toISOString() : undefined
-      };
-
-      const { data, error } = await supabase
-        .from("products")
-        .insert([productData])
-        .select();
-
+      const { data, error } = await supabase.from("products").insert([values]).select();
       if (error) throw error;
 
       setProducts([...products, data[0]]);
@@ -516,25 +488,10 @@ const AdminProducts = () => {
 
   const onSubmitEdit = async (values: z.infer<typeof formSchema>) => {
     try {
-      // Convert Date to ISO string for Supabase and ensure required fields are present
-      const productData = {
-        name: values.name, // Make sure required fields are explicitly set
-        price: values.price,
-        description: values.description || "",
-        old_price: values.old_price || null,
-        stock_quantity: values.stock_quantity,
-        is_featured: values.is_featured || false,
-        category_id: values.category_id,
-        subcategory_id: values.subcategory_id || null,
-        image_url: values.image_url,
-        created_at: values.created_at ? values.created_at.toISOString() : undefined
-      };
-
       const { error } = await supabase
         .from("products")
-        .update(productData)
+        .update(values)
         .eq("id", selectedProduct.id);
-
       if (error) throw error;
 
       setProducts(
@@ -1029,3 +986,18 @@ const AdminProducts = () => {
 };
 
 export default AdminProducts;
+
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  FormDescription,
+} from "@/components/ui/form";
+import { Checkbox } from "@/components/ui/checkbox";
+
+</edits_to_apply>

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useCashierAuth } from "@/hooks/useAdminAuth";
 import { supabase } from "@/integrations/supabase/client";
@@ -28,28 +27,7 @@ const CashierDashboard = () => {
           .limit(100);
 
         if (error) throw error;
-        
-        // Map database fields to our Product type
-        const mappedProducts: Product[] = (data || []).map(item => ({
-          id: item.id,
-          name: item.name,
-          description: item.description || '',
-          price: item.price,
-          oldPrice: item.old_price,
-          imageUrl: item.image_url || '',
-          category_id: item.category_id || '',
-          subcategory_id: item.subcategory_id,
-          stockQuantity: item.stock_quantity,
-          isFeatured: item.is_featured || false,
-          created_at: item.created_at,
-          // Include original fields for compatibility
-          image_url: item.image_url,
-          old_price: item.old_price,
-          stock_quantity: item.stock_quantity,
-          is_featured: item.is_featured
-        }));
-        
-        setProducts(mappedProducts);
+        setProducts(data || []);
       } catch (error) {
         console.error("Error fetching products:", error);
       }
@@ -310,7 +288,6 @@ const Checkout = ({ cart, customerId, customerDetails, reset }: any) => {
         product_id: item.id,
         quantity: item.quantity,
         price: item.price, // Use price instead of unit_price
-        // These fields are for display in the frontend and not stored in DB:
         product_name: item.name,
         product_image: item.imageUrl
       }));
