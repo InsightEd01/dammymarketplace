@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { useAdminAuth } from "@/hooks/useAdminAuth";
 import { supabase } from "@/integrations/supabase/client";
@@ -14,7 +15,6 @@ import {
   Pagination,
   PaginationContent,
   PaginationItem,
-  PaginationLink,
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
@@ -69,7 +69,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Calendar } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
-import { CalendarIcon } from "@radix-ui/react-icons";
+import { CalendarIcon } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -106,7 +106,8 @@ const formSchema = z.object({
   created_at: z.date().optional(),
 });
 
-const PaginationLink = ({
+// Custom PaginationLink component that accepts the required props
+const PaginationLinkComponent = ({
   page,
   isActive,
   onClick,
@@ -264,12 +265,11 @@ const ProductsTable = ({
                 
                 return (
                   <PaginationItem key={pageNum}>
-                    <PaginationLink
+                    <PaginationLinkComponent
+                      page={pageNum}
                       isActive={currentPage === pageNum}
                       onClick={() => onPageChange(pageNum)}
-                    >
-                      {pageNum}
-                    </PaginationLink>
+                    />
                   </PaginationItem>
                 );
               })}
@@ -477,7 +477,17 @@ const AdminProducts = () => {
 
   const onSubmitCreate = async (values: z.infer<typeof formSchema>) => {
     try {
-      const { data, error } = await supabase.from("products").insert([values]).select();
+      // Convert Date to ISO string for Supabase
+      const productData = {
+        ...values,
+        created_at: values.created_at ? values.created_at.toISOString() : undefined
+      };
+
+      const { data, error } = await supabase
+        .from("products")
+        .insert([productData])
+        .select();
+
       if (error) throw error;
 
       setProducts([...products, data[0]]);
@@ -498,10 +508,17 @@ const AdminProducts = () => {
 
   const onSubmitEdit = async (values: z.infer<typeof formSchema>) => {
     try {
+      // Convert Date to ISO string for Supabase
+      const productData = {
+        ...values,
+        created_at: values.created_at ? values.created_at.toISOString() : undefined
+      };
+
       const { error } = await supabase
         .from("products")
-        .update(values)
+        .update(productData)
         .eq("id", selectedProduct.id);
+
       if (error) throw error;
 
       setProducts(

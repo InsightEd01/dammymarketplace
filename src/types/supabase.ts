@@ -29,6 +29,12 @@ export type Product = {
   subcategory?: string; // Subcategory name for display
   created_at?: string;
   createdAt?: string; // For compatibility with mockData
+  
+  // Database field mappings
+  image_url?: string;
+  old_price?: number;
+  stock_quantity?: number;
+  is_featured?: boolean;
 };
 
 export type Customer = {
@@ -78,6 +84,10 @@ export type OrderItem = {
   price: number; // Used instead of unit_price to match DB
   product_name?: string;
   product_image?: string;
+  products?: {
+    image_url?: string;
+    name?: string;
+  };
 };
 
 export type ChatStatus = 'open' | 'assigned' | 'closed';
