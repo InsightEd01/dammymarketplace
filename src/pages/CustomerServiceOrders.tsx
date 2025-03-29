@@ -46,6 +46,23 @@ import {
   ArrowUpDown,
 } from "lucide-react";
 
+const getStatusBadgeClass = (status: string) => {
+  switch (status.toLowerCase()) {
+    case "pending":
+      return "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400";
+    case "processing":
+      return "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400";
+    case "shipped":
+      return "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400";
+    case "delivered":
+      return "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400";
+    case "cancelled":
+      return "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400";
+    default:
+      return "bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400";
+  }
+};
+
 const CustomerServiceOrders = () => {
   const { isLoading: authLoading } = useCustomerServiceAuth();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -55,7 +72,6 @@ const CustomerServiceOrders = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [totalCount, setTotalCount] = useState(0);
 
-  // Pagination and filtering state
   const [currentPage, setCurrentPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedStatus, setSelectedStatus] = useState<string>("");
@@ -64,7 +80,6 @@ const CustomerServiceOrders = () => {
 
   const pageSize = 10;
 
-  // Initialize from URL params
   useEffect(() => {
     const page = parseInt(searchParams.get("page") || "1");
     const query = searchParams.get("query") || "";
@@ -79,7 +94,6 @@ const CustomerServiceOrders = () => {
     setSortOrder(order as "asc" | "desc");
   }, [searchParams]);
 
-  // Update URL when filters change
   useEffect(() => {
     const params: Record<string, string> = {};
 
@@ -92,14 +106,12 @@ const CustomerServiceOrders = () => {
     setSearchParams(params, { replace: true });
   }, [currentPage, searchQuery, selectedStatus, sortField, sortOrder, setSearchParams]);
 
-  // Fetch orders with filters
   useEffect(() => {
     const fetchOrders = async () => {
       if (authLoading) return;
 
       setIsLoading(true);
       try {
-        // Start building the query
         let query = supabase
           .from("orders")
           .select(
@@ -110,9 +122,7 @@ const CustomerServiceOrders = () => {
             { count: "exact" }
           );
 
-        // Apply filters
         if (searchQuery) {
-          // Search by order ID or customer name/email
           query = query.or(
             `id.ilike.%${searchQuery}%,customer_id.eq.(${supabase
               .from("customer_profiles")
@@ -126,15 +136,12 @@ const CustomerServiceOrders = () => {
           query = query.eq("status", selectedStatus);
         }
 
-        // Apply sorting
         query = query.order(sortField, { ascending: sortOrder === "asc" });
 
-        // Apply pagination
         const from = (currentPage - 1) * pageSize;
         const to = from + pageSize - 1;
         query = query.range(from, to);
 
-        // Execute query
         const { data, error, count } = await query;
 
         if (error) throw error;
@@ -166,10 +173,8 @@ const CustomerServiceOrders = () => {
 
   const handleSort = (field: string) => {
     if (field === sortField) {
-      // Toggle sort order if clicking the same field
       setSortOrder(sortOrder === "asc" ? "desc" : "asc");
     } else {
-      // Set new sort field and default to descending
       setSortField(field);
       setSortOrder("desc");
     }
@@ -177,12 +182,12 @@ const CustomerServiceOrders = () => {
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    setCurrentPage(1); // Reset to first page on new search
+    setCurrentPage(1);
   };
 
   const handleStatusChange = (status: string) => {
     setSelectedStatus(status);
-    setCurrentPage(1); // Reset to first page on status change
+    setCurrentPage(1);
   };
 
   const handlePageChange = (page: number) => {
@@ -215,7 +220,6 @@ const CustomerServiceOrders = () => {
         </CardHeader>
         <CardContent>
           <div className="flex flex-col md:flex-row gap-4 mb-6">
-            {/* Search */}
             <form
               onSubmit={handleSearch}
               className="flex w-full md:w-1/2 space-x-2"
@@ -231,7 +235,6 @@ const CustomerServiceOrders = () => {
               </Button>
             </form>
 
-            {/* Status Filter */}
             <div className="flex items-center space-x-2">
               <Filter className="h-4 w-4 text-muted-foreground" />
               <Select
@@ -365,4 +368,81 @@ const CustomerServiceOrders = () => {
                             size="sm"
                             className="h-8 w-8 p-0"
                           >
-                            <Link to={`/customer-service/orders/${order.
+                            <Link to={`/customer-service/orders/${order.id}`}>
+                              <Eye className="h-4 w-4" />
+                            </Link>
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+
+              {totalCount > pageSize && (
+                <div className="mt-4 flex justify-center">
+                  <Pagination>
+                    <PaginationContent>
+                      <PaginationItem>
+                        <PaginationPrevious
+                          onClick={() => handlePageChange(Math.max(1, currentPage - 1))}
+                          className={currentPage === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                        />
+                      </PaginationItem>
+                      
+                      {Array.from(
+                        { length: Math.min(5, Math.ceil(totalCount / pageSize)) },
+                        (_, i) => {
+                          const totalPages = Math.ceil(totalCount / pageSize);
+                          let pageNum;
+                          
+                          if (totalPages <= 5) {
+                            pageNum = i + 1;
+                          } else if (currentPage <= 3) {
+                            pageNum = i + 1;
+                          } else if (currentPage >= totalPages - 2) {
+                            pageNum = totalPages - 4 + i;
+                          } else {
+                            pageNum = currentPage - 2 + i;
+                          }
+                          
+                          return (
+                            <PaginationItem key={pageNum}>
+                              <PaginationLink
+                                isActive={currentPage === pageNum}
+                                onClick={() => handlePageChange(pageNum)}
+                              >
+                                {pageNum}
+                              </PaginationLink>
+                            </PaginationItem>
+                          );
+                        }
+                      )}
+                      
+                      <PaginationItem>
+                        <PaginationNext
+                          onClick={() => 
+                            handlePageChange(
+                              Math.min(Math.ceil(totalCount / pageSize), currentPage + 1)
+                            )
+                          }
+                          className={
+                            currentPage === Math.ceil(totalCount / pageSize)
+                              ? "pointer-events-none opacity-50"
+                              : "cursor-pointer"
+                          }
+                        />
+                      </PaginationItem>
+                    </PaginationContent>
+                  </Pagination>
+                </div>
+              )}
+            </>
+          )}
+        </CardContent>
+      </Card>
+    </div>
+  );
+};
+
+export default CustomerServiceOrders;
