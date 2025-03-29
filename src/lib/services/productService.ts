@@ -32,6 +32,7 @@ export const fetchFeaturedProducts = async (
       isFeatured: item.is_featured || false,
       stockQuantity: item.stock_quantity || 0,
       oldPrice: item.old_price || undefined,
+      createdAt: item.created_at || "", // Add createdAt for compatibility
     }));
   } catch (error) {
     console.error("Unexpected error fetching featured products:", error);
@@ -69,6 +70,7 @@ export const fetchNewArrivals = async (
       isFeatured: item.is_featured || false,
       stockQuantity: item.stock_quantity || 0,
       oldPrice: item.old_price || undefined,
+      createdAt: item.created_at || "", // Add createdAt for compatibility
     }));
   } catch (error) {
     console.error("Unexpected error fetching new arrivals:", error);
@@ -89,7 +91,7 @@ export const fetchProductById = async (
         subcategories:subcategory_id(name)
       `,
       )
-      .eq("id", id)
+      .eq("id", id.toString()) // Convert id to string to handle both string and number types
       .single();
 
     if (error) {
@@ -106,6 +108,7 @@ export const fetchProductById = async (
       isFeatured: data.is_featured || false,
       stockQuantity: data.stock_quantity || 0,
       oldPrice: data.old_price || undefined,
+      createdAt: data.created_at || "", // Add createdAt for compatibility
     };
   } catch (error) {
     console.error(`Unexpected error fetching product ${id}:`, error);
@@ -148,6 +151,7 @@ export const fetchProductsByCategory = async (
       isFeatured: item.is_featured || false,
       stockQuantity: item.stock_quantity || 0,
       oldPrice: item.old_price || undefined,
+      createdAt: item.created_at || "", // Add createdAt for compatibility
     }));
   } catch (error) {
     console.error(
@@ -190,6 +194,7 @@ export const searchProducts = async (
       isFeatured: item.is_featured || false,
       stockQuantity: item.stock_quantity || 0,
       oldPrice: item.old_price || undefined,
+      createdAt: item.created_at || "", // Add createdAt for compatibility
     }));
   } catch (error) {
     console.error(

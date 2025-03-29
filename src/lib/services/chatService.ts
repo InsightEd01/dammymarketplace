@@ -1,5 +1,6 @@
+
 import { supabase } from "@/integrations/supabase/client";
-import { Chat, ChatMessage } from "@/types/supabase";
+import { Chat, ChatMessage, ChatStatus, SenderType } from "@/types/supabase";
 
 // Function to get all chats
 export const getAllChats = async (): Promise<Chat[]> => {
@@ -19,7 +20,11 @@ export const getAllChats = async (): Promise<Chat[]> => {
       return [];
     }
 
-    return data || [];
+    // Transform the data to match our Chat type
+    return (data || []).map(chat => ({
+      ...chat,
+      status: chat.status as ChatStatus,
+    }));
   } catch (error) {
     console.error("Unexpected error fetching chats:", error);
     return [];
@@ -45,7 +50,11 @@ export const getOpenChats = async (): Promise<Chat[]> => {
       return [];
     }
 
-    return data || [];
+    // Transform the data to match our Chat type
+    return (data || []).map(chat => ({
+      ...chat,
+      status: chat.status as ChatStatus,
+    }));
   } catch (error) {
     console.error("Unexpected error fetching open chats:", error);
     return [];
@@ -72,7 +81,11 @@ export const getRepChats = async (repId: string): Promise<Chat[]> => {
       return [];
     }
 
-    return data || [];
+    // Transform the data to match our Chat type
+    return (data || []).map(chat => ({
+      ...chat,
+      status: chat.status as ChatStatus,
+    }));
   } catch (error) {
     console.error(`Unexpected error fetching chats for rep ${repId}:`, error);
     return [];
@@ -95,7 +108,11 @@ export const getChatMessages = async (
       return [];
     }
 
-    return data || [];
+    // Transform the data to match our ChatMessage type
+    return (data || []).map(message => ({
+      ...message,
+      sender_type: message.sender_type as SenderType,
+    }));
   } catch (error) {
     console.error(
       `Unexpected error fetching messages for chat ${chatId}:`,
@@ -109,7 +126,7 @@ export const getChatMessages = async (
 export const sendChatMessage = async (
   chatId: string,
   senderId: string,
-  senderType: string,
+  senderType: SenderType,
   content: string,
 ): Promise<ChatMessage | null> => {
   try {
@@ -129,7 +146,10 @@ export const sendChatMessage = async (
       return null;
     }
 
-    return data;
+    return {
+      ...data,
+      sender_type: data.sender_type as SenderType,
+    };
   } catch (error) {
     console.error(`Unexpected error sending message to chat ${chatId}:`, error);
     return null;
@@ -146,7 +166,7 @@ export const assignChatToRep = async (
       .from("chats")
       .update({
         rep_id: repId,
-        status: "assigned",
+        status: "assigned" as ChatStatus,
       })
       .eq("id", chatId)
       .select()
@@ -157,7 +177,10 @@ export const assignChatToRep = async (
       return null;
     }
 
-    return data;
+    return {
+      ...data,
+      status: data.status as ChatStatus,
+    };
   } catch (error) {
     console.error(
       `Unexpected error assigning chat ${chatId} to rep ${repId}:`,
@@ -173,7 +196,7 @@ export const closeChat = async (chatId: string): Promise<Chat | null> => {
     const { data, error } = await supabase
       .from("chats")
       .update({
-        status: "closed",
+        status: "closed" as ChatStatus,
       })
       .eq("id", chatId)
       .select()
@@ -184,7 +207,10 @@ export const closeChat = async (chatId: string): Promise<Chat | null> => {
       return null;
     }
 
-    return data;
+    return {
+      ...data,
+      status: data.status as ChatStatus,
+    };
   } catch (error) {
     console.error(`Unexpected error closing chat ${chatId}:`, error);
     return null;
@@ -200,7 +226,7 @@ export const createNewChat = async (
       .from("chats")
       .insert({
         customer_id: customerId,
-        status: "open",
+        status: "open" as ChatStatus,
       })
       .select()
       .single();
@@ -210,7 +236,10 @@ export const createNewChat = async (
       return null;
     }
 
-    return data;
+    return {
+      ...data,
+      status: data.status as ChatStatus,
+    };
   } catch (error) {
     console.error(
       `Unexpected error creating chat for customer ${customerId}:`,

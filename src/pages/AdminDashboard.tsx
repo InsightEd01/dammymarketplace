@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useAdminAuth } from "@/hooks/useAdminAuth";
 import { supabase } from "@/integrations/supabase/client";
@@ -41,6 +40,7 @@ import {
 import { Link } from "react-router-dom";
 import { ResponsiveContainer, AreaChart, Area, BarChart as RechartsBarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
 import { useToast } from "@/hooks/use-toast";
+import { Badge } from "@/components/ui/badge";
 
 // Mock data for charts
 const salesData = [
@@ -883,10 +883,10 @@ const AdminDashboard = () => {
               <p className="text-muted-foreground">Generate and download business reports</p>
             </div>
             <div className="flex items-center gap-2">
-              <Input 
-                className="w-[250px]" 
-                placeholder="Search reports" 
-                startIcon={<Search className="h-4 w-4" />} 
+              <SearchInput
+                className="w-full md:w-[300px] lg:w-[400px]"
+                placeholder="Search orders, customers, products..."
+                startIcon={Search}
               />
               <Button variant="outline">
                 <CreditCard className="mr-2 h-4 w-4" />
@@ -1059,6 +1059,24 @@ const Download = (props: any) => {
       <polyline points="7 10 12 15 17 10" />
       <line x1="12" y1="15" x2="12" y2="3" />
     </svg>
+  );
+};
+
+const SearchInput = ({ className, placeholder, startIcon: StartIcon, onChange }: { 
+  className?: string;
+  placeholder?: string;
+  startIcon: React.ElementType;
+  onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
+}) => {
+  return (
+    <div className={`relative ${className}`}>
+      <StartIcon className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+      <Input
+        className="pl-8"
+        placeholder={placeholder}
+        onChange={onChange}
+      />
+    </div>
   );
 };
 

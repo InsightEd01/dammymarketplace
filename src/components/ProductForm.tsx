@@ -211,8 +211,16 @@ const ProductForm: React.FC<ProductFormProps> = ({ productId, onSuccess }) => {
       // Upload image if there's a new one
       const finalImageUrl = await uploadImage();
 
+      // Ensure all required fields are properly defined
       const productData = {
-        ...data,
+        name: data.name,
+        price: data.price,
+        description: data.description || "",
+        category_id: data.category_id,
+        subcategory_id: data.subcategory_id || null,
+        stock_quantity: data.stock_quantity,
+        is_featured: data.is_featured,
+        old_price: data.old_price || null,
         image_url: finalImageUrl,
       };
 

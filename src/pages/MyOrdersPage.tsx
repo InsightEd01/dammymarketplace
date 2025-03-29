@@ -68,7 +68,9 @@ const MyOrdersPage = () => {
 
         if (error) throw error;
 
-        setOrders((data as OrderWithItems[]) || []);
+        // Convert the data to OrderWithItems[] with explicit type casting
+        setOrders(data as unknown as OrderWithItems[]);
+
       } catch (error: any) {
         console.error("Error fetching orders:", error);
         toast({

@@ -66,10 +66,8 @@ const CashierDashboard = () => {
 
       setDashboardLoading(true);
       try {
-        // Get today's date in ISO format (YYYY-MM-DD)
         const today = new Date().toISOString().split("T")[0];
 
-        // Fetch today's orders
         const { data: todayOrders, error: ordersError } = await supabase
           .from("orders")
           .select("*")
@@ -78,7 +76,6 @@ const CashierDashboard = () => {
 
         if (ordersError) throw ordersError;
 
-        // Calculate today's sales and average order value
         const totalSales =
           todayOrders?.reduce(
             (sum, order) => sum + (order.total_amount || 0),
@@ -93,7 +90,6 @@ const CashierDashboard = () => {
           averageOrderValue: avgOrderValue,
         });
 
-        // Fetch recent orders (last 5)
         const { data: recentOrdersData, error: recentOrdersError } =
           await supabase
             .from("orders")
@@ -133,7 +129,6 @@ const CashierDashboard = () => {
 
     setIsSearching(true);
     try {
-      // Search products by name or description
       const { data, error } = await supabase
         .from("products")
         .select("*")
@@ -156,11 +151,9 @@ const CashierDashboard = () => {
   };
 
   const addToCart = (product: any) => {
-    // Check if product is already in cart
     const existingItem = cart.find((item) => item.id === product.id);
 
     if (existingItem) {
-      // Update quantity
       setCart(
         cart.map((item) =>
           item.id === product.id
@@ -169,7 +162,6 @@ const CashierDashboard = () => {
         ),
       );
     } else {
-      // Add new item
       setCart([
         ...cart,
         {
@@ -190,10 +182,8 @@ const CashierDashboard = () => {
 
   const updateQuantity = (productId: string, newQuantity: number) => {
     if (newQuantity <= 0) {
-      // Remove item if quantity is 0 or less
       setCart(cart.filter((item) => item.id !== productId));
     } else {
-      // Update quantity
       setCart(
         cart.map((item) =>
           item.id === productId ? { ...item, quantity: newQuantity } : item,
@@ -235,7 +225,6 @@ const CashierDashboard = () => {
 
     setDashboardLoading(true);
     try {
-      // First, check if customer exists or create a new one
       let customerId;
       const { data: existingCustomer, error: customerError } = await supabase
         .from("customer_profiles")
@@ -244,20 +233,19 @@ const CashierDashboard = () => {
         .single();
 
       if (customerError && customerError.code !== "PGRST116") {
-        // PGRST116 is the error code for "no rows returned"
         throw customerError;
       }
 
       if (existingCustomer) {
         customerId = existingCustomer.id;
       } else {
-        // Create new customer
         const { data: newCustomer, error: createError } = await supabase
           .from("customer_profiles")
           .insert({
-            full_name: customerInfo.name,
-            email: customerInfo.email,
-            phone: customerInfo.phone || null,
+            id: customer.id,
+            full_name: customer.full_name,
+            address: customer.address || null,
+            phone: customer.phone || null,
           })
           .select()
           .single();
@@ -266,12 +254,11 @@ const CashierDashboard = () => {
         customerId = newCustomer.id;
       }
 
-      // Create order
-      const { data: order, error: orderError } = await supabase
+      const { data: orderData, error: orderError } = await supabase
         .from("orders")
         .insert({
           customer_id: customerId,
-          status: "completed", // For in-store purchases, mark as completed
+          status: "completed",
           total_amount: calculateTotal(),
           payment_method: "in-store",
           shipping_address: "In-store purchase",
@@ -281,47 +268,34 @@ const CashierDashboard = () => {
 
       if (orderError) throw orderError;
 
-      // Create order items
-      const orderItems = cart.map((item) => ({
-        order_id: order.id,
+      const orderItemsToInsert = cart.map(item => ({
+        order_id: orderData.id,
         product_id: item.id,
         quantity: item.quantity,
-        unit_price: item.price,
-        product_name: item.name,
-        product_image: item.image_url,
+        price: item.price,
       }));
 
       const { error: itemsError } = await supabase
         .from("order_items")
-        .insert(orderItems);
+        .insert(orderItemsToInsert);
 
       if (itemsError) throw itemsError;
 
-      // Update product stock quantities
       for (const item of cart) {
-        const { error: updateError } = await supabase
+        await supabase
           .from("products")
           .update({
-            stock_quantity: supabase.rpc("decrement_stock", {
+            stock_quantity: supabase.rpc('decrement_stock', {
               p_id: item.id,
-              amount: item.quantity,
-            }),
+              amount: item.quantity
+            })
           })
           .eq("id", item.id);
-
-        if (updateError) {
-          console.error(
-            `Error updating stock for product ${item.id}:`,
-            updateError,
-          );
-          // Continue with other products even if one fails
-        }
       }
 
-      // Success! Clear cart and customer info
       toast({
         title: "Order Completed",
-        description: `Order #${order.id.substring(0, 8)} has been processed successfully`,
+        description: `Order #${orderData.id.substring(0, 8)} has been processed successfully`,
         variant: "default",
       });
 
@@ -332,7 +306,6 @@ const CashierDashboard = () => {
         phone: "",
       });
 
-      // Refresh dashboard data
       const today = new Date().toISOString().split("T")[0];
       const { data: todayOrders } = await supabase
         .from("orders")
@@ -354,7 +327,6 @@ const CashierDashboard = () => {
         averageOrderValue: avgOrderValue,
       });
 
-      // Refresh recent orders
       const { data: recentOrdersData } = await supabase
         .from("orders")
         .select(
@@ -787,7 +759,6 @@ const CashierDashboard = () => {
   );
 };
 
-// Helper function to get status badge class
 const getStatusBadgeClass = (status: string) => {
   switch (status.toLowerCase()) {
     case "pending":

@@ -87,7 +87,6 @@ const AdminProducts = () => {
   const [deleteProductId, setDeleteProductId] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
 
-  // Pagination and filtering state
   const [currentPage, setCurrentPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("");
@@ -98,7 +97,6 @@ const AdminProducts = () => {
 
   const pageSize = 10;
 
-  // Initialize from URL params
   useEffect(() => {
     const page = parseInt(searchParams.get("page") || "1");
     const query = searchParams.get("query") || "";
@@ -117,7 +115,6 @@ const AdminProducts = () => {
     setFilterFeatured(featured);
   }, [searchParams]);
 
-  // Update URL when filters change
   useEffect(() => {
     const params: Record<string, string> = {};
 
@@ -141,7 +138,6 @@ const AdminProducts = () => {
     setSearchParams,
   ]);
 
-  // Fetch categories for filter
   useEffect(() => {
     const fetchCategories = async () => {
       try {
@@ -160,14 +156,12 @@ const AdminProducts = () => {
     fetchCategories();
   }, []);
 
-  // Fetch products with filters
   useEffect(() => {
     const fetchProducts = async () => {
       if (authLoading) return;
 
       setIsLoading(true);
       try {
-        // Start building the query
         let query = supabase.from("products").select(
           `
             *,
@@ -177,7 +171,6 @@ const AdminProducts = () => {
           { count: "exact" },
         );
 
-        // Apply filters
         if (searchQuery) {
           query = query.or(
             `name.ilike.%${searchQuery}%,description.ilike.%${searchQuery}%`,
@@ -196,15 +189,12 @@ const AdminProducts = () => {
           query = query.eq("is_featured", true);
         }
 
-        // Apply sorting
         query = query.order(sortField, { ascending: sortOrder === "asc" });
 
-        // Apply pagination
         const from = (currentPage - 1) * pageSize;
         const to = from + pageSize - 1;
         query = query.range(from, to);
 
-        // Execute query
         const { data, error, count } = await query;
 
         if (error) throw error;
@@ -253,7 +243,6 @@ const AdminProducts = () => {
         description: "The product has been successfully deleted",
       });
 
-      // Update products list
       setProducts(products.filter((p) => p.id !== deleteProductId));
     } catch (error: any) {
       console.error("Error deleting product:", error);
@@ -616,7 +605,6 @@ const AdminProducts = () => {
                   {Array.from({ length: Math.ceil(totalCount / pageSize) }).map(
                     (_, i) => {
                       const page = i + 1;
-                      // Show first page, last page, and pages around current page
                       if (
                         page === 1 ||
                         page === Math.ceil(totalCount / pageSize) ||
@@ -627,6 +615,8 @@ const AdminProducts = () => {
                             <PaginationLink
                               isActive={page === currentPage}
                               onClick={() => handlePageChange(page)}
+                              as="button"
+                              disabled={false}
                             >
                               {page}
                             </PaginationLink>
@@ -653,7 +643,7 @@ const AdminProducts = () => {
                           Math.min(
                             Math.ceil(totalCount / pageSize),
                             currentPage + 1,
-                          ),
+                          )
                         )
                       }
                       disabled={

@@ -1,3 +1,4 @@
+
 // Define types for our Supabase database tables
 export type Category = {
   id: string;
@@ -27,6 +28,7 @@ export type Product = {
   category?: string; // Category name for display
   subcategory?: string; // Added subcategory name for display
   created_at?: string;
+  createdAt?: string; // Added for compatibility with mockData
 };
 
 export type Customer = {
@@ -55,10 +57,12 @@ export type Promotion = {
   created_at?: string;
 };
 
+export type OrderStatus = 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
+
 export type Order = {
   id: string;
   customer_id: string;
-  status: 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
+  status: OrderStatus;
   total_amount: number;
   shipping_address: string;
   payment_method: string;
@@ -71,24 +75,31 @@ export type OrderItem = {
   order_id: string;
   product_id: string;
   quantity: number;
-  unit_price: number;
+  price: number; // Changed from unit_price to price to match DB
   product_name: string;
   product_image?: string;
 };
+
+export type ChatStatus = 'open' | 'assigned' | 'closed';
+export type SenderType = 'customer' | 'rep' | 'system';
 
 export type Chat = {
   id: string;
   customer_id: string;
   rep_id?: string;
-  status: 'open' | 'assigned' | 'closed';
+  status: ChatStatus;
   created_at: string;
+  customer?: {
+    full_name?: string;
+    email?: string;
+  };
 };
 
 export type ChatMessage = {
   id: string;
   chat_id: string;
   sender_id: string;
-  sender_type: 'customer' | 'rep' | 'system';
+  sender_type: SenderType;
   content: string;
   created_at: string;
 };
