@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -63,17 +64,21 @@ const MyOrdersPage = () => {
               product_image: item.products?.image_url || null,
             }));
 
-            return {
+            // Create a complete order object with all required properties,
+            // providing default values for potentially missing fields
+            const completeOrder: OrderWithItems = {
               id: order.id,
               customer_id: order.customer_id,
               status: order.status,
               total_amount: order.total_amount,
               shipping_address: order.shipping_address || '',
-              payment_method: order.payment_method || 'unknown',
-              transaction_id: order.transaction_id || '',
+              payment_method: order.payment_method || 'unknown', // Default value if missing
+              transaction_id: order.transaction_id || '',        // Default value if missing
               created_at: order.created_at,
               order_items,
-            } as OrderWithItems;
+            };
+            
+            return completeOrder;
           });
           
           setOrders(ordersWithItems);

@@ -72,8 +72,10 @@ export type Order = {
   total_amount: number;
   shipping_address: string;
   payment_method: string;
-  transaction_id?: string;
+  transaction_id: string;
   created_at: string;
+  // Add notes field to match DB structure
+  notes?: string;
 };
 
 export type OrderItem = {
