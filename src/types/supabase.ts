@@ -15,20 +15,20 @@ export type Subcategory = {
 };
 
 export type Product = {
-  id: string | number;
+  id: string;
   name: string;
   description: string;
   price: number;
-  oldPrice?: number; // Added oldPrice property
+  oldPrice?: number;
   imageUrl: string;
   category_id: string;
   subcategory_id?: string;
   stockQuantity: number;
   isFeatured: boolean;
   category?: string; // Category name for display
-  subcategory?: string; // Added subcategory name for display
+  subcategory?: string; // Subcategory name for display
   created_at?: string;
-  createdAt?: string; // Added for compatibility with mockData
+  createdAt?: string; // For compatibility with mockData
 };
 
 export type Customer = {
@@ -75,8 +75,8 @@ export type OrderItem = {
   order_id: string;
   product_id: string;
   quantity: number;
-  price: number; // Changed from unit_price to price to match DB
-  product_name: string;
+  price: number; // Used instead of unit_price to match DB
+  product_name?: string;
   product_image?: string;
 };
 

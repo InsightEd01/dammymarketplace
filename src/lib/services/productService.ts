@@ -1,5 +1,24 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import { Product } from "@/types/supabase";
+
+// Helper function to transform database product data to our Product type
+const transformProductData = (item: any): Product => ({
+  id: item.id.toString(), // Ensure id is always string
+  name: item.name,
+  description: item.description || "",
+  price: item.price,
+  oldPrice: item.old_price || undefined,
+  imageUrl: item.image_url || "",
+  category_id: item.category_id || "",
+  subcategory_id: item.subcategory_id || undefined,
+  stockQuantity: item.stock_quantity || 0,
+  isFeatured: item.is_featured || false,
+  category: item.categories?.name || "",
+  subcategory: item.subcategories?.name || "",
+  created_at: item.created_at || "",
+  createdAt: item.created_at || "",
+});
 
 export const fetchFeaturedProducts = async (
   limit: number = 8,
@@ -24,16 +43,7 @@ export const fetchFeaturedProducts = async (
     }
 
     // Transform the data to match our Product type
-    return data.map((item) => ({
-      ...item,
-      category: item.categories?.name || "",
-      subcategory: item.subcategories?.name || "",
-      imageUrl: item.image_url || "",
-      isFeatured: item.is_featured || false,
-      stockQuantity: item.stock_quantity || 0,
-      oldPrice: item.old_price || undefined,
-      createdAt: item.created_at || "", // Add createdAt for compatibility
-    }));
+    return (data || []).map(transformProductData);
   } catch (error) {
     console.error("Unexpected error fetching featured products:", error);
     return [];
@@ -62,16 +72,7 @@ export const fetchNewArrivals = async (
     }
 
     // Transform the data to match our Product type
-    return data.map((item) => ({
-      ...item,
-      category: item.categories?.name || "",
-      subcategory: item.subcategories?.name || "",
-      imageUrl: item.image_url || "",
-      isFeatured: item.is_featured || false,
-      stockQuantity: item.stock_quantity || 0,
-      oldPrice: item.old_price || undefined,
-      createdAt: item.created_at || "", // Add createdAt for compatibility
-    }));
+    return (data || []).map(transformProductData);
   } catch (error) {
     console.error("Unexpected error fetching new arrivals:", error);
     return [];
@@ -91,7 +92,7 @@ export const fetchProductById = async (
         subcategories:subcategory_id(name)
       `,
       )
-      .eq("id", id.toString()) // Convert id to string to handle both string and number types
+      .eq("id", id.toString())
       .single();
 
     if (error) {
@@ -100,16 +101,7 @@ export const fetchProductById = async (
     }
 
     // Transform the data to match our Product type
-    return {
-      ...data,
-      category: data.categories?.name || "",
-      subcategory: data.subcategories?.name || "",
-      imageUrl: data.image_url || "",
-      isFeatured: data.is_featured || false,
-      stockQuantity: data.stock_quantity || 0,
-      oldPrice: data.old_price || undefined,
-      createdAt: data.created_at || "", // Add createdAt for compatibility
-    };
+    return transformProductData(data);
   } catch (error) {
     console.error(`Unexpected error fetching product ${id}:`, error);
     return null;
@@ -143,16 +135,7 @@ export const fetchProductsByCategory = async (
     }
 
     // Transform the data to match our Product type
-    return data.map((item) => ({
-      ...item,
-      category: item.categories?.name || "",
-      subcategory: item.subcategories?.name || "",
-      imageUrl: item.image_url || "",
-      isFeatured: item.is_featured || false,
-      stockQuantity: item.stock_quantity || 0,
-      oldPrice: item.old_price || undefined,
-      createdAt: item.created_at || "", // Add createdAt for compatibility
-    }));
+    return (data || []).map(transformProductData);
   } catch (error) {
     console.error(
       `Unexpected error fetching products for category ${categoryId}:`,
@@ -186,16 +169,7 @@ export const searchProducts = async (
     }
 
     // Transform the data to match our Product type
-    return data.map((item) => ({
-      ...item,
-      category: item.categories?.name || "",
-      subcategory: item.subcategories?.name || "",
-      imageUrl: item.image_url || "",
-      isFeatured: item.is_featured || false,
-      stockQuantity: item.stock_quantity || 0,
-      oldPrice: item.old_price || undefined,
-      createdAt: item.created_at || "", // Add createdAt for compatibility
-    }));
+    return (data || []).map(transformProductData);
   } catch (error) {
     console.error(
       `Unexpected error searching products with query "${query}":`,

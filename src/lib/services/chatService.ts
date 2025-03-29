@@ -24,6 +24,10 @@ export const getAllChats = async (): Promise<Chat[]> => {
     return (data || []).map(chat => ({
       ...chat,
       status: chat.status as ChatStatus,
+      customer: {
+        full_name: chat.customer?.full_name || '',
+        email: chat.customer?.email || '',
+      }
     }));
   } catch (error) {
     console.error("Unexpected error fetching chats:", error);
@@ -54,6 +58,10 @@ export const getOpenChats = async (): Promise<Chat[]> => {
     return (data || []).map(chat => ({
       ...chat,
       status: chat.status as ChatStatus,
+      customer: {
+        full_name: chat.customer?.full_name || '',
+        email: chat.customer?.email || '',
+      }
     }));
   } catch (error) {
     console.error("Unexpected error fetching open chats:", error);
@@ -85,6 +93,10 @@ export const getRepChats = async (repId: string): Promise<Chat[]> => {
     return (data || []).map(chat => ({
       ...chat,
       status: chat.status as ChatStatus,
+      customer: {
+        full_name: chat.customer?.full_name || '',
+        email: chat.customer?.email || '',
+      }
     }));
   } catch (error) {
     console.error(`Unexpected error fetching chats for rep ${repId}:`, error);
@@ -166,7 +178,7 @@ export const assignChatToRep = async (
       .from("chats")
       .update({
         rep_id: repId,
-        status: "assigned" as ChatStatus,
+        status: "assigned",
       })
       .eq("id", chatId)
       .select()
@@ -196,7 +208,7 @@ export const closeChat = async (chatId: string): Promise<Chat | null> => {
     const { data, error } = await supabase
       .from("chats")
       .update({
-        status: "closed" as ChatStatus,
+        status: "closed",
       })
       .eq("id", chatId)
       .select()
@@ -226,7 +238,7 @@ export const createNewChat = async (
       .from("chats")
       .insert({
         customer_id: customerId,
-        status: "open" as ChatStatus,
+        status: "open",
       })
       .select()
       .single();
