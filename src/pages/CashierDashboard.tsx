@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { useCashierAuth } from "@/hooks/useAdminAuth";
 import { supabase } from "@/integrations/supabase/client";
@@ -288,6 +289,7 @@ const Checkout = ({ cart, customerId, customerDetails, reset }: any) => {
         product_id: item.id,
         quantity: item.quantity,
         price: item.price, // Use price instead of unit_price
+        // These fields are for display in the frontend and not stored in DB:
         product_name: item.name,
         product_image: item.imageUrl
       }));
