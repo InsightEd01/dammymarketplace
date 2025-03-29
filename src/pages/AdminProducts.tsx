@@ -44,6 +44,7 @@ import {
   Search,
   ArrowUpDown,
   ImagePlus,
+  CalendarIcon,
 } from "lucide-react";
 import {
   AlertDialog,
@@ -69,7 +70,6 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Calendar } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
-import { CalendarIcon } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -477,9 +477,17 @@ const AdminProducts = () => {
 
   const onSubmitCreate = async (values: z.infer<typeof formSchema>) => {
     try {
-      // Convert Date to ISO string for Supabase
+      // Convert Date to ISO string for Supabase and ensure required fields are present
       const productData = {
-        ...values,
+        name: values.name, // Make sure required fields are explicitly set
+        price: values.price,
+        description: values.description || "",
+        old_price: values.old_price || null,
+        stock_quantity: values.stock_quantity,
+        is_featured: values.is_featured || false,
+        category_id: values.category_id,
+        subcategory_id: values.subcategory_id || null,
+        image_url: values.image_url,
         created_at: values.created_at ? values.created_at.toISOString() : undefined
       };
 
@@ -508,9 +516,17 @@ const AdminProducts = () => {
 
   const onSubmitEdit = async (values: z.infer<typeof formSchema>) => {
     try {
-      // Convert Date to ISO string for Supabase
+      // Convert Date to ISO string for Supabase and ensure required fields are present
       const productData = {
-        ...values,
+        name: values.name, // Make sure required fields are explicitly set
+        price: values.price,
+        description: values.description || "",
+        old_price: values.old_price || null,
+        stock_quantity: values.stock_quantity,
+        is_featured: values.is_featured || false,
+        category_id: values.category_id,
+        subcategory_id: values.subcategory_id || null,
+        image_url: values.image_url,
         created_at: values.created_at ? values.created_at.toISOString() : undefined
       };
 
