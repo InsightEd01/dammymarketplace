@@ -1,19 +1,31 @@
-import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { supabase } from '@/integrations/supabase/client';
-import { useCart } from '@/context/CartContext';
-import { useToast } from '@/hooks/use-toast';
-import { Button } from '@/components/ui/button';
+import React, { useState, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+import { useCart } from "@/context/CartContext";
+import { useToast } from "@/hooks/use-toast";
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
-  DropdownMenuTrigger
-} from '@/components/ui/dropdown-menu';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Menu, ShoppingCart, User, LogOut, Home, Package, Search } from 'lucide-react';
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import {
+  Menu,
+  ShoppingCart,
+  User,
+  LogOut,
+  Home,
+  Package,
+  Search,
+  Sun,
+  Moon,
+} from "lucide-react";
+import { useTheme } from "next-themes";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 type Category = {
   id: string;
@@ -34,9 +46,9 @@ const Navbar = () => {
   const { cart } = useCart();
   const { toast } = useToast();
   const navigate = useNavigate();
-  
+
   const cartItems = cart || [];
-  
+
   useEffect(() => {
     const getUser = async () => {
       try {
@@ -46,63 +58,65 @@ const Navbar = () => {
         console.error("Error getting user:", error);
       }
     };
-    
+
     getUser();
-    
-    const { data: authListener } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null);
-    });
-    
+
+    const { data: authListener } = supabase.auth.onAuthStateChange(
+      (_event, session) => {
+        setUser(session?.user ?? null);
+      },
+    );
+
     const fetchCategories = async () => {
       try {
         setCategories([
           {
-            id: '1',
-            name: 'Collectibles',
+            id: "1",
+            name: "Collectibles",
             subcategories: [
-              { id: '1-1', name: 'Trading Cards', category_id: '1' },
-              { id: '1-2', name: 'Figurines', category_id: '1' }
-            ]
+              { id: "1-1", name: "Trading Cards", category_id: "1" },
+              { id: "1-2", name: "Figurines", category_id: "1" },
+            ],
           },
           {
-            id: '2',
-            name: 'Vintage',
+            id: "2",
+            name: "Vintage",
             subcategories: [
-              { id: '2-1', name: 'Records', category_id: '2' },
-              { id: '2-2', name: 'Comics', category_id: '2' }
-            ]
-          }
+              { id: "2-1", name: "Records", category_id: "2" },
+              { id: "2-2", name: "Comics", category_id: "2" },
+            ],
+          },
         ]);
       } catch (error) {
-        console.error('Error fetching categories:', error);
+        console.error("Error fetching categories:", error);
       }
     };
-    
+
     fetchCategories();
-    
+
     return () => {
       if (authListener?.subscription) {
         authListener.subscription.unsubscribe();
       }
     };
   }, []);
-  
+
   const handleSignOut = async () => {
     try {
       const { error } = await supabase.auth.signOut();
-      
+
       if (error) {
         toast({
           title: "Error signing out",
           description: error.message,
-          variant: "destructive"
+          variant: "destructive",
         });
       } else {
         toast({
           title: "Signed out",
-          description: "You have been signed out successfully"
+          description: "You have been signed out successfully",
         });
-        navigate('/login');
+        navigate("/login");
       }
     } catch (error) {
       console.error("Error signing out:", error);
@@ -119,16 +133,16 @@ const Navbar = () => {
                 Dammy Collectibles
               </Link>
             </div>
-            
+
             <div className="hidden sm:ml-6 sm:flex sm:space-x-8">
-              <Link 
-                to="/" 
+              <Link
+                to="/"
                 className="inline-flex items-center px-1 pt-1 border-b-2 border-transparent text-sm font-medium text-gray-500 hover:text-gray-700 hover:border-gray-300"
               >
                 <Home className="mr-1 h-4 w-4" />
                 Home
               </Link>
-              
+
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <button className="inline-flex items-center px-1 pt-1 border-b-2 border-transparent text-sm font-medium text-gray-500 hover:text-gray-700 hover:border-gray-300">
@@ -141,23 +155,29 @@ const Navbar = () => {
                     categories.map((category) => (
                       <React.Fragment key={category.id}>
                         <DropdownMenuLabel>
-                          <Link to={`/products?category=${category.id}`} className="w-full block">
+                          <Link
+                            to={`/products?category=${category.id}`}
+                            className="w-full block"
+                          >
                             {category.name}
                           </Link>
                         </DropdownMenuLabel>
-                        
-                        {category.subcategories && category.subcategories.length > 0 && (
-                          <>
-                            {category.subcategories.map((subcategory) => (
-                              <DropdownMenuItem key={subcategory.id} asChild>
-                                <Link to={`/products?subcategory=${subcategory.id}`}>
-                                  {subcategory.name}
-                                </Link>
-                              </DropdownMenuItem>
-                            ))}
-                            <DropdownMenuSeparator />
-                          </>
-                        )}
+
+                        {category.subcategories &&
+                          category.subcategories.length > 0 && (
+                            <>
+                              {category.subcategories.map((subcategory) => (
+                                <DropdownMenuItem key={subcategory.id} asChild>
+                                  <Link
+                                    to={`/products?subcategory=${subcategory.id}`}
+                                  >
+                                    {subcategory.name}
+                                  </Link>
+                                </DropdownMenuItem>
+                              ))}
+                              <DropdownMenuSeparator />
+                            </>
+                          )}
                       </React.Fragment>
                     ))
                   ) : (
@@ -165,9 +185,9 @@ const Navbar = () => {
                   )}
                 </DropdownMenuContent>
               </DropdownMenu>
-              
-              <Link 
-                to="/products" 
+
+              <Link
+                to="/products"
                 className="inline-flex items-center px-1 pt-1 border-b-2 border-transparent text-sm font-medium text-gray-500 hover:text-gray-700 hover:border-gray-300"
               >
                 <Search className="mr-1 h-4 w-4" />
@@ -175,9 +195,12 @@ const Navbar = () => {
               </Link>
             </div>
           </div>
-          
+
           <div className="flex items-center">
-            <Link to="/cart" className="p-2 text-gray-400 hover:text-gray-500 relative">
+            <Link
+              to="/cart"
+              className="p-2 text-gray-400 hover:text-gray-500 relative"
+            >
               <ShoppingCart className="h-6 w-6" />
               {cartItems.length > 0 && (
                 <span className="absolute top-0 right-0 bg-primary text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
@@ -185,15 +208,17 @@ const Navbar = () => {
                 </span>
               )}
             </Link>
-            
+
+            <ThemeToggle />
+
             {user ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" className="ml-3 relative">
                     <Avatar className="h-8 w-8">
-                      <AvatarImage src={user.user_metadata?.avatar_url || ''} />
+                      <AvatarImage src={user.user_metadata?.avatar_url || ""} />
                       <AvatarFallback>
-                        {user.email ? user.email.charAt(0).toUpperCase() : 'U'}
+                        {user.email ? user.email.charAt(0).toUpperCase() : "U"}
                       </AvatarFallback>
                     </Avatar>
                   </Button>
@@ -224,7 +249,7 @@ const Navbar = () => {
                 </Button>
               </Link>
             )}
-            
+
             <div className="flex items-center sm:hidden">
               <button
                 onClick={() => setIsOpen(!isOpen)}
@@ -237,7 +262,7 @@ const Navbar = () => {
         </div>
       </div>
 
-      <div className={`${isOpen ? 'block' : 'hidden'} sm:hidden`}>
+      <div className={`${isOpen ? "block" : "hidden"} sm:hidden`}>
         <div className="pt-2 pb-3 space-y-1">
           <Link
             to="/"
@@ -246,7 +271,7 @@ const Navbar = () => {
           >
             Home
           </Link>
-          
+
           {categories.map((category) => (
             <div key={category.id}>
               <Link
@@ -256,7 +281,7 @@ const Navbar = () => {
               >
                 {category.name}
               </Link>
-              
+
               {category.subcategories && category.subcategories.length > 0 && (
                 <div className="pl-6">
                   {category.subcategories.map((subcategory) => (
@@ -273,7 +298,7 @@ const Navbar = () => {
               )}
             </div>
           ))}
-          
+
           <Link
             to="/products"
             className="block pl-3 pr-4 py-2 border-l-4 border-transparent text-base font-medium text-gray-600 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-800"
